@@ -249,7 +249,7 @@ For a list of metrics exposed via the Control Plane:
 
 ![](images/7.png)
 
-### Monitoring, Observability, & Telemetry
+### OTel (Traces, Logs, Metrics)
 
 ```
 export INGRESS_GW_ADDRESS=$(kubectl get svc -n microapp frontend-gateway -o jsonpath="{.status.loadBalancer.ingress[0]['hostname','ip']}")
