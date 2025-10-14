@@ -207,6 +207,8 @@ kubectl port-forward deployment/gloo-mesh-ui -n gloo-system 8090
 
 ![](images/4.png)
 
+## Monitoring & Observability
+
 ### Prometheus and Grafana configuration
 
 1. Add the Grafana Helm Chart
