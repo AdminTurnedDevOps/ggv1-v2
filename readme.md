@@ -35,18 +35,64 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downloa
 
 3. Install Gloo Gateway v2 CRDs
 ```
-helm upgrade -i gloo-gateway-crds oci://us-docker.pkg.dev/solo-public/gloo-gateway/charts/gloo-gateway-crds \
---namespace gloo-system \
---version 2.0.0 \
---create-namespace
+kubectl apply -f- <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gloo-gateway-crds
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gloo-system
+  project: default
+  source:
+    chart: gloo-gateway-crds
+    repoURL: oci://us-docker.pkg.dev/solo-public/gloo-gateway/charts/gloo-gateway-crds
+    targetRevision: 2.0.0
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  ignoreDifferences:
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+EOF
 ```
 
 4. Install Gloo Gateway v2
 ```
-helm upgrade -i gloo-gateway oci://us-docker.pkg.dev/solo-public/gloo-gateway/charts/gloo-gateway \
--n gloo-system \
---version 2.0.0 \
---set licensing.glooGatewayLicenseKey=$GLOO_GATEWAY_LICENSE_KEY
+kubectl apply -f- <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gloo-gateway
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gloo-system
+  project: default
+  source:
+    chart: gloo-gateway
+    repoURL: oci://us-docker.pkg.dev/solo-public/gloo-gateway/charts/gloo-gateway
+    targetRevision: 2.0.0
+    helm:
+      values: |
+        licensing:
+          glooGatewayLicenseKey: $GLOO_GATEWAY_LICENSE_KEY
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+  ignoreDifferences:
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+EOF
 ```
 
 5. Confirm that Gloo Gateway is running
@@ -56,8 +102,7 @@ NAME                           READY   STATUS    RESTARTS   AGE
 gloo-gateway-6dfbfb7d7-9kbhf   1/1     Running   0          2m38s
 ```
 
-
-#### Argo/GitOps
+You can find more information about ArgoCD and Gloo Gateway at the link below.
 
 ArgoCD installation is available as well: https://docs.solo.io/gateway/2.0.x/install/argocd/
 
@@ -84,12 +129,11 @@ You can also see the Services that are deployed, which is what you'll use to cre
 kubectl get svc -n microapp
 ```
 
-4. Create a Gateway for the application
+4. Create a Kubernetes Manifest for the application object below.
 
 The `allowedroutes` portion means that you can create an `HTTPRoute` resource from all Namespaces
 
 ```
-kubectl apply --context=$CLUSTER1 -f - <<EOF
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -121,10 +165,34 @@ spec:
     backendRefs:
       - name: frontend
         port: 80
-EOF
 ```
 
-5. Check to see the gateway IP address.
+5. Create an `Application` object for your Gateway/HTTPRoute:
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend-gateway-httproute
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/your-repo.git
+    targetRevision: main
+    path: path/to/gateway/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: microapp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+```
+
+6. Check to see the gateway IP address.
 
 ```
 kubectl get gateway -n microapp
