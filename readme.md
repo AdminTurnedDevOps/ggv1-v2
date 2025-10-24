@@ -1308,3 +1308,4 @@ Based on the Evaluation Criteria doc, the following links will be of help for kn
 3. Kubernetes CRD (API/object/kind) support: https://docs.solo.io/gateway/2.0.x/reference/api/gloo-gateway/
 4. Gloo Mesh/Gloo Gateway working together in multi-cluster support: https://github.com/AdminTurnedDevOps/ambient-mesh-lite-demo/blob/main/multi-cluster/sampleapp-microdemo/setup.md
 5. Canary deployments with Mirroring: https://docs.solo.io/gateway/2.0.x/resiliency/mirroring/
+6. Traffic management: https://docs.solo.io/gateway/2.0.x/traffic-management/weighted-routes/
