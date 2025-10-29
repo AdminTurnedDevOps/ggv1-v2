@@ -27,10 +27,9 @@ export GLOO_GATEWAY_LICENSE_KEY=
 ```
 
 2. Install Kubernetes Gateway API
-You need the experimental version as Gloo Gateway v2 has a requirement of the `BackendConfigPolicy` object, which is an experimental feature in Kubernetes Gateway API.
 
 ```
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml
 ```
 
 3. Install Gloo Gateway v2 CRDs
